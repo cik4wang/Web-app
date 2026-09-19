@@ -18,8 +18,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Tailwind Configuration -->
   <script>
@@ -114,6 +112,8 @@
       border:1px solid rgba(226,232,240,.88); color:#334155;
     }
     .glass-button:active { transform:scale(.95); }
+    .dark .notif-test-button { background:rgba(30,41,59,.92); color:#fff; border:1px solid rgba(255,255,255,.14); }
+    .light .notif-test-button { background:rgba(224,242,254,.95); color:#075985; border:1px solid rgba(14,165,233,.35); }
     .no-scrollbar::-webkit-scrollbar { display:none; }
     .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
     .glow-amber { box-shadow:0 0 15px rgba(245,158,11,.35); }
@@ -148,14 +148,15 @@
       border-radius:0 0 22px 22px;
     }
     .app-header-content {
-      min-height:64px;
-      padding:12px 20px;
+      position:relative;
+      min-height:76px;
+      padding:14px 20px;
       padding-top:max(12px, env(safe-area-inset-top));
       display:flex;
       align-items:center;
-      justify-content:flex-start;
-      gap:12px;
+      justify-content:center;
     }
+    .app-header-content > div { margin-inline:auto; }
 
     .app-main { padding-bottom:11rem; }
     .app-bottom-nav { padding-bottom:max(.5rem, env(safe-area-inset-bottom)); }
@@ -164,23 +165,49 @@
       -webkit-backdrop-filter:blur(24px) saturate(160%);
     }
 
+    /* Form selection: make the entire option visibly selected, not just the text */
+    .form-loc-btn.is-selected, .form-type-btn.is-selected {
+      background: linear-gradient(135deg, rgba(14,165,233,.34), rgba(59,130,246,.22)) !important;
+      border-color: rgba(14,165,233,.75) !important;
+      color: #0284c7 !important;
+      box-shadow: 0 0 0 2px rgba(14,165,233,.16), 0 6px 18px rgba(14,165,233,.16);
+      font-weight: 800 !important;
+    }
+    .dark .form-loc-btn.is-selected, .dark .form-type-btn.is-selected {
+      background: linear-gradient(135deg, rgba(14,165,233,.42), rgba(59,130,246,.28)) !important;
+      color: #7dd3fc !important;
+      border-color: rgba(56,189,248,.85) !important;
+      box-shadow: 0 0 0 2px rgba(56,189,248,.18), 0 6px 20px rgba(14,165,233,.22);
+    }
+    .form-loc-btn.is-selected::after, .form-type-btn.is-selected::after {
+      content: '✓';
+      margin-left: auto;
+      font-weight: 900;
+    }
+    .form-loc-btn.is-selected { padding-left: .75rem; padding-right: .75rem; }
+
     @supports not ((backdrop-filter: blur(1px))) {
       .glass-panel,.glass-card,.glass-button { background:rgba(15,23,42,.92); }
       .light .glass-panel,.light .glass-card,.light .glass-button { background:rgba(255,255,255,.94); }
     }
+
+    .location-management-card > summary::-webkit-details-marker { display:none; }
+    .location-management-card > summary { list-style:none; }
+    .location-management-card[open] .location-management-chevron { transform:rotate(180deg); }
+    .location-management-chevron { transition:transform .2s ease; }
 </style>
 </head>
 <body class="text-slate-100 dark:text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-sky-500 selection:text-white ios-safe-left ios-safe-right">
 
   <header class="app-header glass-panel">
     <div class="app-header-content">
-      <div class="flex items-center space-x-3 min-w-0">
+      <div class="flex items-center justify-center space-x-3 min-w-0">
         <div class="p-2.5 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 shrink-0">
-          <i data-lucide="shield-check" class="w-6 h-6"></i>
+          <i data-lucide="shield-check" class="w-8 h-8"></i>
         </div>
-        <div class="min-w-0">
-          <h1 class="text-lg font-extrabold tracking-tight dark:text-white light:text-slate-800 truncate">淨家 FilterTrack</h1>
-          <p class="text-[10px] dark:text-slate-400 light:text-slate-500 font-semibold">智能濾網管家</p>
+        <div class="min-w-0 text-center">
+          <h1 class="text-xl font-extrabold tracking-tight dark:text-white light:text-slate-800 truncate">淨家 FilterTrack</h1>
+          <p class="text-[11px] dark:text-slate-400 light:text-slate-500 font-semibold">智能濾網管家</p>
         </div>
       </div>
     </div>
@@ -188,74 +215,25 @@
 
   <main class="flex-1 px-4 py-4 max-w-lg mx-auto w-full space-y-6 pb-40 app-main">
 
-    <!-- Overall Health Summary Dashboard Card -->
-    <section class="glass-card rounded-3xl p-5 relative overflow-hidden">
-      <div class="absolute -right-10 -bottom-10 w-36 h-36 bg-sky-500/20 rounded-full blur-3xl pointer-events-none"></div>
-      
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h2 class="text-xs font-bold uppercase tracking-wider dark:text-slate-300 light:text-slate-600">整體濾網健康度</h2>
-          <p class="text-[11px] dark:text-slate-400 light:text-slate-500 mt-0.5">即時追蹤全家空氣與水源狀態</p>
+    <!-- Time Chart Page -->
+    <section id="timePage" class="hidden glass-card rounded-3xl p-5 relative overflow-hidden">
+      <div class="absolute -right-10 -top-10 w-36 h-36 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative">
+        <div class="flex items-end justify-between mb-4">
+          <div>
+            <h2 class="text-sm font-extrabold dark:text-white light:text-slate-800">濾網更換時間圖</h2>
+            
+          </div>
+          <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-sky-500/10 text-sky-500 border border-sky-500/20">月視圖</span>
         </div>
-        <span id="health-score-badge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-          健康度 100%
-        </span>
-      </div>
-
-      <div class="grid grid-cols-12 gap-4 items-center">
-        <!-- Donut Chart -->
-        <div class="col-span-5 flex justify-center relative">
-          <div class="w-28 h-28 relative flex items-center justify-center">
-            <canvas id="statusChart"></canvas>
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-              <span id="total-filter-count" class="text-2xl font-black dark:text-white light:text-slate-800">0</span>
-              <span class="text-[10px] dark:text-slate-400 light:text-slate-500 font-medium">總濾網數</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Summary Status Breakdown -->
-        <div class="col-span-7 space-y-2">
-          <div class="flex items-center justify-between p-2 rounded-xl dark:bg-slate-900/40 light:bg-white/60 border border-black/5 dark:border-white/5">
-            <div class="flex items-center space-x-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
-              <span class="text-xs font-medium dark:text-slate-300 light:text-slate-700">狀態良好</span>
-            </div>
-            <span id="count-normal" class="text-xs font-extrabold text-emerald-500">0</span>
-          </div>
-
-          <div class="flex items-center justify-between p-2 rounded-xl dark:bg-slate-900/40 light:bg-white/60 border border-black/5 dark:border-white/5">
-            <div class="flex items-center space-x-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50"></span>
-              <span class="text-xs font-medium dark:text-slate-300 light:text-slate-700">即時更換 (&lt;15天)</span>
-            </div>
-            <span id="count-warning" class="text-xs font-extrabold text-amber-500">0</span>
-          </div>
-
-          <div class="flex items-center justify-between p-2 rounded-xl dark:bg-slate-900/40 light:bg-white/60 border border-black/5 dark:border-white/5">
-            <div class="flex items-center space-x-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span>
-              <span class="text-xs font-medium dark:text-slate-300 light:text-slate-700">已過期</span>
-            </div>
-            <span id="count-expired" class="text-xs font-extrabold text-rose-500">0</span>
-          </div>
-        </div>
+        <div id="replacement-timeline" class="relative"></div>
       </div>
     </section>
 
+    <div id="overviewPage">
     <section class="flex flex-col space-y-3">
       <!-- Location Filters -->
-      <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
-        <button onclick="setFilterLocation('ALL')" class="loc-filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold glass-button bg-sky-500 text-white border-none shadow-md shadow-sky-500/30" data-loc="ALL">
-          全區域
-        </button>
-        <button onclick="setFilterLocation('客廳')" class="loc-filter-btn shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium glass-button" data-loc="客廳">客廳</button>
-        <button onclick="setFilterLocation('客用浴室')" class="loc-filter-btn shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium glass-button" data-loc="客用浴室">客用浴室</button>
-        <button onclick="setFilterLocation('主臥浴室')" class="loc-filter-btn shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium glass-button" data-loc="主臥浴室">主臥浴室</button>
-        <button onclick="setFilterLocation('主臥')" class="loc-filter-btn shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium glass-button" data-loc="主臥">主臥</button>
-        <button onclick="setFilterLocation('大寶房')" class="loc-filter-btn shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium glass-button" data-loc="大寶房">大寶房</button>
-        <button onclick="setFilterLocation('二寶房')" class="loc-filter-btn shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium glass-button" data-loc="二寶房">二寶房</button>
-      </div>
+      <div id="locationFilterOptions" class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1"></div>
 
       <!-- Type Filters -->
       <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-0.5 whitespace-nowrap">
@@ -272,6 +250,7 @@
     <section id="cards-container" class="space-y-6">
       <!-- Dynamic Filter Cards Rendered Here -->
     </section>
+    </div><!-- /overviewPage -->
   </main>
 
   <div id="deleteConfirmModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md hidden transition-opacity duration-300">
@@ -294,6 +273,27 @@
     </div>
   </div>
 
+  <div id="deletePasswordModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-md hidden transition-opacity duration-300">
+    <div class="glass-panel w-full max-w-xs rounded-3xl p-5 text-center space-y-4 border border-white/20 shadow-2xl mx-4 animate-slide-up">
+      <div class="w-12 h-12 mx-auto rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center">
+        <i data-lucide="shield-alert" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-bold dark:text-white light:text-slate-800">刪除安全驗證</h3>
+        <p class="text-xs dark:text-slate-300 light:text-slate-600 mt-1">為避免誤刪，請輸入下方隨機 4 位數驗證碼</p>
+      </div>
+      <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 py-3">
+        <div id="delete-code-display" class="text-2xl tracking-[0.45em] font-black text-amber-500 pl-[0.45em]">----</div>
+      </div>
+      <input id="delete-code-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="輸入 4 位數" class="w-full text-center text-lg tracking-[0.35em] rounded-2xl px-4 py-3 glass-button outline-none border border-black/10 dark:border-white/10 focus:border-amber-500/60">
+      <p id="delete-code-error" class="text-[11px] font-bold text-rose-500 min-h-[16px]"></p>
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button onclick="closeDeletePasswordModal()" class="glass-button py-2.5 rounded-xl text-xs font-semibold dark:text-slate-300 light:text-slate-700">取消</button>
+        <button onclick="verifyDeleteCode()" class="py-2.5 rounded-xl text-xs font-bold bg-amber-500 text-white shadow-lg shadow-amber-500/30 hover:bg-amber-600 transition">驗證</button>
+      </div>
+    </div>
+  </div>
+
   <div id="filterModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-md hidden transition-opacity duration-300">
     <div class="glass-panel w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-6 border-t border-white/20 shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar animate-slide-up">
       <div class="flex justify-between items-center mb-5 pb-3 border-b border-black/10 dark:border-white/10">
@@ -308,21 +308,14 @@
         </button>
       </div>
 
-      <form id="filterForm" onsubmit="handleSaveFilter(event)" class="space-y-4">
+      <form id="filterForm" onsubmit="handleSaveFilter(event)" novalidate class="space-y-4">
         <input type="hidden" id="formId" value="" />
 
         <!-- Location Selection -->
         <div>
           <label class="block text-xs font-bold dark:text-slate-300 light:text-slate-700 mb-1.5">安裝區域</label>
-          <div class="grid grid-cols-3 gap-2">
-            <button type="button" onclick="selectFormLoc('客廳')" class="form-loc-btn py-2 text-xs rounded-xl glass-button text-center font-medium" data-loc="客廳">客廳</button>
-            <button type="button" onclick="selectFormLoc('客用浴室')" class="form-loc-btn py-2 text-xs rounded-xl glass-button text-center font-medium" data-loc="客用浴室">客用浴室</button>
-            <button type="button" onclick="selectFormLoc('主臥浴室')" class="form-loc-btn py-2 text-xs rounded-xl glass-button text-center font-medium" data-loc="主臥浴室">主臥浴室</button>
-            <button type="button" onclick="selectFormLoc('主臥')" class="form-loc-btn py-2 text-xs rounded-xl glass-button text-center font-medium" data-loc="主臥">主臥</button>
-            <button type="button" onclick="selectFormLoc('大寶房')" class="form-loc-btn py-2 text-xs rounded-xl glass-button text-center font-medium" data-loc="大寶房">大寶房</button>
-            <button type="button" onclick="selectFormLoc('二寶房')" class="form-loc-btn py-2 text-xs rounded-xl glass-button text-center font-medium" data-loc="二寶房">二寶房</button>
-          </div>
-          <input type="hidden" id="formLocation" required />
+          <div id="formLocationOptions" class="grid grid-cols-3 gap-2"></div>
+          <input type="hidden" id="formLocation" />
         </div>
 
         <!-- Filter Type Selection -->
@@ -346,7 +339,7 @@
               <span>洗手台</span>
             </button>
           </div>
-          <input type="hidden" id="formType" required />
+          <input type="hidden" id="formType" />
         </div>
 
         <!-- Filter Name / Model -->
@@ -384,29 +377,46 @@
     </div>
   </div>
 
+  <div id="replacementHistoryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md hidden transition-opacity duration-300">
+    <div class="glass-panel w-full max-w-sm rounded-3xl p-6 border border-white/20 shadow-2xl mx-4 max-h-[80vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center space-x-2 min-w-0"><i data-lucide="history" class="w-5 h-5 text-sky-400 shrink-0"></i><div class="min-w-0"><h3 class="text-base font-bold dark:text-white light:text-slate-800">更換紀錄</h3><p id="replacement-history-title" class="text-[10px] text-slate-400 truncate"></p></div></div>
+        <button onclick="closeReplacementHistory()" class="p-1 rounded-full glass-button shrink-0"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="replacement-history-list" class="space-y-1"></div>
+    </div>
+  </div>
+
   <div id="notificationModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md hidden transition-opacity duration-300">
     <div class="glass-panel w-full max-w-sm rounded-3xl p-6 border border-white/20 shadow-2xl mx-4">
       <div class="flex justify-between items-center mb-4">
         <div class="flex items-center space-x-2">
           <i data-lucide="bell-ring" class="w-5 h-5 text-sky-400"></i>
-          <h3 class="text-base font-bold dark:text-white light:text-slate-800">通知與安裝提示</h3>
+          <h3 class="text-base font-bold dark:text-white light:text-slate-800">濾芯到期通知</h3>
         </div>
         <button onclick="toggleNotificationModal()" class="p-1 rounded-full glass-button">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="space-y-4 text-xs dark:text-slate-300 light:text-slate-600">
-        <div class="p-3.5 rounded-2xl bg-sky-500/10 border border-sky-500/20 space-y-2">
-          <p class="font-bold text-sky-500 flex items-center space-x-1.5">
-            <i data-lucide="smartphone" class="w-4 h-4"></i>
-            <span>iOS 加入主畫面說明</span>
-          </p>
-          <p class="leading-relaxed">
-            請點選 Safari 底部分享按鈕 <strong class="dark:text-white light:text-slate-900">「加入主畫面」</strong>，即可全螢幕體驗並獲得更穩定之背景通知。
-          </p>
+      <div class="mb-4 p-3 rounded-2xl glass-button">
+        <div class="flex items-center justify-between mb-2">
+          <p class="font-bold dark:text-white light:text-slate-800">到期提醒</p>
+          <span id="expiry-notification-count" class="text-[10px] font-bold rounded-full px-2 py-1 bg-rose-500/10 text-rose-500">0 項</span>
         </div>
+        <div id="expiry-notification-list" class="space-y-2 text-xs" aria-live="polite"></div>
+      </div>
 
+    </div>
+  </div>
+
+  <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md hidden transition-opacity duration-300">
+    <div class="glass-panel w-full max-w-sm rounded-3xl p-6 border border-white/20 shadow-2xl mx-4 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center gap-2"><i data-lucide="settings" class="w-5 h-5 text-sky-400"></i><h3 class="text-base font-bold dark:text-white light:text-slate-800">設定</h3></div>
+        <button onclick="toggleSettingsModal()" class="p-1 rounded-full glass-button"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="space-y-4 text-xs dark:text-slate-300 light:text-slate-600">
         <div class="p-3.5 rounded-2xl glass-button border border-sky-500/20 space-y-3">
           <div class="flex items-center justify-between">
             <div>
@@ -427,6 +437,29 @@
           <p class="text-[10px] leading-relaxed text-slate-400">點「匯出資料」會下載備份檔。你可以手動上傳到 Google Drive；需要還原時，再從這裡選擇備份檔即可。</p>
         </div>
 
+        <details class="location-management-card rounded-xl glass-button">
+          <summary class="list-none cursor-pointer p-3 flex items-center justify-between gap-3 select-none">
+            <div class="min-w-0">
+              <p class="font-bold dark:text-white light:text-slate-800 flex items-center gap-1.5"><i data-lucide="map-pin" class="w-4 h-4 text-sky-500"></i>區域管理</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">可修改區域名稱，既有濾網也會同步更新</p>
+            </div>
+            <i data-lucide="chevron-down" class="location-management-chevron w-4 h-4 shrink-0 text-slate-400"></i>
+          </summary>
+          <div class="px-3 pb-3 pt-1">
+            <div id="location-management-list" class="space-y-2"></div>
+            <p class="text-[9px] text-slate-400 mt-2">可直接修改現有區域名稱；儲存後才會套用，復原可回到上次儲存內容。</p>
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <button type="button" onclick="restoreLocationDraft()" class="py-2.5 rounded-lg glass-button font-bold text-xs flex items-center justify-center gap-1.5">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>復原
+              </button>
+              <button type="button" id="save-location-btn" onclick="saveLocationChanges()" class="py-2.5 rounded-lg bg-sky-500 text-white font-bold text-xs shadow-md flex items-center justify-center gap-1.5 transition-all">
+                <i data-lucide="save" class="w-4 h-4"></i><span>儲存</span>
+              </button>
+            </div>
+          </div>
+        </details>
+
+
         <div class="p-3 rounded-xl glass-button space-y-3">
           <div class="flex items-center justify-between">
             <div>
@@ -444,41 +477,54 @@
             <p class="font-bold dark:text-white light:text-slate-800">網頁推播權限</p>
             <p id="notif-permission-status" class="text-[10px] text-slate-400">檢查中...</p>
           </div>
-          <button onclick="requestNotificationPermission()" class="px-3 py-1.5 rounded-lg bg-sky-500 text-white font-bold text-xs shadow-md">
-            要求授權
-          </button>
+          <button onclick="requestNotificationPermission()" class="px-3 py-1.5 rounded-lg bg-sky-500 text-white font-bold text-xs shadow-md">取得權限</button>
         </div>
 
         <div class="p-3 rounded-xl glass-button space-y-2">
-          <p class="font-bold dark:text-white light:text-slate-800">即時測試通知</p>
-          <button onclick="sendTestNotification()" class="w-full py-2 rounded-lg bg-slate-800 dark:bg-slate-800 light:bg-slate-200 dark:text-white light:text-slate-800 font-medium text-xs">
-            發送模擬到期提醒
+          <p class="font-bold dark:text-white light:text-slate-800">通知測試</p>
+          <button onclick="sendTestNotification()" class="w-full py-2 rounded-lg notif-test-button font-medium text-xs">發送模擬到期提醒</button>
+        </div>
+
+        <div class="p-3 rounded-xl glass-button border border-rose-500/20 space-y-2">
+          <div>
+            <p class="font-bold dark:text-white light:text-slate-800 flex items-center gap-1.5"><i data-lucide="rotate-ccw" class="w-4 h-4 text-rose-500"></i>完全重置</p>
+            <p class="text-[10px] text-slate-400 mt-0.5">清除所有濾網卡片與所有更換紀錄，回到尚未建立濾網的初始狀態。</p>
+          </div>
+          <button type="button" onclick="askResetAllFilters()" class="w-full py-2.5 rounded-lg bg-rose-500 text-white font-bold text-xs shadow-md shadow-rose-500/20 flex items-center justify-center gap-1.5">
+            <i data-lucide="shield-alert" class="w-4 h-4"></i>完全重置
           </button>
         </div>
+
       </div>
     </div>
   </div>
 
+
   <footer class="fixed bottom-0 inset-x-0 z-30 ios-safe-bottom px-6 py-2 pointer-events-none app-bottom-nav">
     <div class="max-w-md mx-auto glass-panel rounded-full p-2 flex items-center justify-around pointer-events-auto border border-white/20 shadow-2xl">
-      <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="flex flex-col items-center p-2 text-sky-500">
-        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-        <span class="text-[10px] font-bold mt-0.5">總覽</span>
+      <button onclick="showPage('overviewPage',this)" class="nav-page-btn flex flex-col items-center p-2 text-sky-500">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-0.5">總覽</span>
+      </button>
+      <button onclick="showPage('timePage',this)" class="nav-page-btn flex flex-col items-center p-2 dark:text-slate-400 light:text-slate-600">
+        <i data-lucide="chart-gantt" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-0.5">時間圖</span>
       </button>
 
-      <button onclick="openAddModal()" class="p-3.5 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 text-white shadow-lg shadow-sky-500/40 -mt-6 hover:scale-105 active:scale-95 transition">
+      <button onclick="openAddModal()" class="p-3 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 text-white shadow-lg shadow-sky-500/40 -mt-6 hover:scale-105 active:scale-95 transition">
         <i data-lucide="plus" class="w-6 h-6"></i>
       </button>
 
-      <button onclick="toggleNotificationModal()" class="flex flex-col items-center p-2 dark:text-slate-400 light:text-slate-600">
-        <i data-lucide="settings" class="w-5 h-5"></i>
-        <span class="text-[10px] font-bold mt-0.5">設定</span>
+      <button onclick="openExpiryNotifications()" aria-label="查看濾芯到期通知" class="relative flex flex-col items-center p-2 dark:text-slate-400 light:text-slate-600">
+        <i data-lucide="bell" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-0.5">通知</span>
+      </button>
+      <button onclick="toggleSettingsModal()" aria-label="開啟設定" class="flex flex-col items-center p-2 dark:text-slate-400 light:text-slate-600">
+        <i data-lucide="settings" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-0.5">設定</span>
       </button>
     </div>
   </footer>
 
   <script>
-    const LOCATIONS = ["客廳", "客用浴室", "主臥浴室", "主臥", "大寶房", "二寶房"];
+    let LOCATIONS = ["客廳", "客用浴室", "主臥浴室", "主臥", "大寶房", "二寶房"];
+    let locationDraft = [...LOCATIONS];
     const FILTER_TYPES = ["空氣清淨機", "蓮蓬頭", "淋浴出水口", "洗手台"];
 
     const DEFAULT_FILTERS = [
@@ -490,10 +536,12 @@
     ];
 
     let filters = [];
+    let replacementHistory = [];
     let activeLocFilter = "ALL";
     let activeTypeFilter = "ALL";
-    let statusChartInstance = null;
     let pendingDeleteId = null;
+    let pendingDeleteCode = null;
+    let pendingResetCode = null;
 
     function formatDateOffset(daysOffset) {
       const d = new Date();
@@ -508,7 +556,9 @@
         version: 1,
         exportedAt: new Date().toISOString(),
         filters: filters,
-        theme: document.documentElement.classList.contains('light') ? 'light' : 'dark'
+        replacementHistory: replacementHistory,
+        theme: document.documentElement.classList.contains('light') ? 'light' : 'dark',
+        locations: LOCATIONS
       };
 
       const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
@@ -564,6 +614,23 @@
             lastDate: item.lastDate,
             lifespan: Number(item.lifespan)
           }));
+          replacementHistory = Array.isArray(backup.replacementHistory) ? backup.replacementHistory.map(h => ({
+            id: String(h.id || ''),
+            date: String(h.date || ''),
+            previousDate: String(h.previousDate || ''),
+            usedDays: Number.isFinite(Number(h.usedDays)) ? Number(h.usedDays) : null,
+            location: String(h.location || ''),
+            type: String(h.type || ''),
+            name: String(h.name || '')
+          })).filter(h => h.id && h.date) : [];
+          if (Array.isArray(backup.locations) && backup.locations.length) {
+            const importedLocations = backup.locations.map(v => String(v).trim()).filter(Boolean);
+            if (new Set(importedLocations).size === importedLocations.length) {
+              LOCATIONS = importedLocations.slice(0, 6);
+              locationDraft = [...LOCATIONS];
+              localStorage.setItem('filter_track_locations', JSON.stringify(LOCATIONS));
+            }
+          }
           saveData();
 
           if (backup.theme === 'light' || backup.theme === 'dark') {
@@ -643,6 +710,29 @@
     }
 
     function initData() {
+      const savedLocations = localStorage.getItem('filter_track_locations');
+      if (savedLocations) {
+        try {
+          const parsed = JSON.parse(savedLocations);
+          if (Array.isArray(parsed) && parsed.length && parsed.every(v => typeof v === 'string' && v.trim())) {
+            // 區域固定維持 6 個；清除舊版本多出的第 7 區域
+            LOCATIONS = parsed.map(v => v.trim()).slice(0, 6);
+            if (LOCATIONS.length < 6) {
+              const defaults = ["客廳", "客用浴室", "主臥浴室", "主臥", "大寶房", "二寶房"];
+              defaults.forEach(name => {
+                if (LOCATIONS.length < 6 && !LOCATIONS.includes(name)) LOCATIONS.push(name);
+              });
+            }
+            localStorage.setItem('filter_track_locations', JSON.stringify(LOCATIONS));
+          }
+        } catch(e) {}
+      }
+      locationDraft = [...LOCATIONS];
+      const savedHistory = localStorage.getItem('filter_track_history');
+      if (savedHistory) {
+        try { replacementHistory = JSON.parse(savedHistory); if (!Array.isArray(replacementHistory)) replacementHistory = []; } catch(e) { replacementHistory = []; }
+      } else { replacementHistory = []; }
+
       const saved = localStorage.getItem('filter_track_data');
       if (saved) {
         try {
@@ -658,6 +748,8 @@
 
     function saveData() {
       localStorage.setItem('filter_track_data', JSON.stringify(filters));
+      localStorage.setItem('filter_track_locations', JSON.stringify(LOCATIONS));
+      localStorage.setItem('filter_track_history', JSON.stringify(replacementHistory));
       render();
     }
 
@@ -679,64 +771,209 @@
       return { daysPassed, remainingDays, percentage, status };
     }
 
+    function renderTopLocationFilters() {
+      const box = document.getElementById('locationFilterOptions');
+      if (!box) return;
+      const buttons = [{name:'全區域', value:'ALL'}, ...LOCATIONS.map(loc => ({name:loc, value:loc}))];
+      box.innerHTML = buttons.map((item, i) => `<button onclick="setFilterLocation('${escapeHtml(item.value)}')" class="loc-filter-btn shrink-0 ${i===0 ? 'px-4' : 'px-3.5'} py-1.5 rounded-full text-xs ${i===0 ? 'font-bold' : 'font-medium'} glass-button" data-loc="${escapeHtml(item.value)}">${escapeHtml(item.name)}</button>`).join('');
+      box.querySelectorAll('.loc-filter-btn').forEach(btn => {
+        const selected = btn.dataset.loc === activeLocFilter;
+        btn.classList.toggle('bg-sky-500', selected);
+        btn.classList.toggle('text-white', selected);
+        btn.classList.toggle('border-none', selected);
+        btn.classList.toggle('shadow-md', selected);
+        btn.classList.toggle('shadow-sky-500/30', selected);
+      });
+    }
+
+    function renderLocationOptions() {
+      const box = document.getElementById('formLocationOptions');
+      const hiddenInput = document.getElementById('formLocation');
+      if (!box || !hiddenInput) return;
+      const selected = hiddenInput.value || '';
+      box.innerHTML = LOCATIONS.map(loc => `<button type="button" class="form-loc-btn py-2 px-2 text-xs rounded-xl glass-button text-center font-medium flex items-center justify-center" data-loc="${escapeHtml(loc)}">${escapeHtml(loc)}</button>`).join('');
+      box.querySelectorAll('.form-loc-btn').forEach(btn => {
+        btn.addEventListener('click', () => selectFormLoc(btn.dataset.loc));
+        btn.classList.toggle('is-selected', btn.dataset.loc === selected);
+      });
+      if (selected && !LOCATIONS.includes(selected)) {
+        hiddenInput.value = '';
+        document.querySelectorAll('.form-loc-btn').forEach(btn => btn.classList.remove('is-selected'));
+      }
+    }
+
+    function renderLocationManagement() {
+      const box = document.getElementById('location-management-list');
+      if (!box) return;
+      if (!Array.isArray(locationDraft) || !locationDraft.length) locationDraft = [...LOCATIONS];
+      box.innerHTML = locationDraft.map((loc, i) => `<div class="flex items-center gap-2">
+        <span class="w-6 text-center text-[10px] font-bold text-slate-400">${i + 1}</span>
+        <input id="location-edit-${i}" value="${escapeHtml(loc)}" oninput="updateLocationDraft(${i}, this.value)" class="flex-1 glass-input px-3 py-2 rounded-lg text-xs focus:outline-none" />
+      </div>`).join('');
+      lucide.createIcons();
+    }
+
+    function updateLocationDraft(index, value) {
+      if (index >= 0 && index < locationDraft.length) locationDraft[index] = value;
+    }
+
+    function restoreLocationDraft() {
+      let saved = localStorage.getItem('filter_track_locations');
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length && parsed.every(v => typeof v === 'string' && v.trim())) {
+          locationDraft = parsed.map(v => v.trim());
+        } else {
+          locationDraft = [...LOCATIONS];
+        }
+      } catch (e) {
+        locationDraft = [...LOCATIONS];
+      }
+      renderLocationManagement();
+      showToast('已復原至上次儲存的內容');
+    }
+
+    function saveLocationChanges() {
+      const names = locationDraft.map(v => String(v).trim());
+      if (!names.length || names.some(v => !v)) {
+        showToast('區域名稱不能空白');
+        return;
+      }
+      if (new Set(names).size !== names.length) {
+        showToast('區域名稱不能重複');
+        return;
+      }
+
+      const oldLocations = [...LOCATIONS];
+      const oldSet = new Set(oldLocations);
+      const mapping = new Map();
+      names.forEach((newName, i) => {
+        const oldName = oldLocations[i];
+        if (oldName && oldName !== newName) mapping.set(oldName, newName);
+      });
+
+      filters.forEach(item => {
+        if (mapping.has(item.location)) item.location = mapping.get(item.location);
+      });
+      if (mapping.has(activeLocFilter)) activeLocFilter = mapping.get(activeLocFilter);
+
+      LOCATIONS = names;
+      locationDraft = [...LOCATIONS];
+      saveData();
+      renderLocationManagement();
+      renderLocationOptions();
+      renderTopLocationFilters();
+
+      const saveBtn = document.getElementById('save-location-btn');
+      if (saveBtn) {
+        const original = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>已儲存</span>';
+        saveBtn.classList.remove('bg-sky-500');
+        saveBtn.classList.add('bg-emerald-500');
+        lucide.createIcons();
+        setTimeout(() => {
+          if (!document.body.contains(saveBtn)) return;
+          saveBtn.innerHTML = original;
+          saveBtn.classList.remove('bg-emerald-500');
+          saveBtn.classList.add('bg-sky-500');
+          lucide.createIcons();
+        }, 1600);
+      }
+      showToast('區域設定已儲存 ✓');
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    function showPage(pageId, btn) {
+      ['overviewPage','timePage'].forEach(id => document.getElementById(id)?.classList.toggle('hidden', id !== pageId));
+      document.querySelectorAll('.nav-page-btn').forEach(b => { b.classList.remove('text-sky-500'); b.classList.add('dark:text-slate-400','light:text-slate-600'); });
+      if (btn) { btn.classList.add('text-sky-500'); btn.classList.remove('dark:text-slate-400','light:text-slate-600'); }
+      window.scrollTo({top:0,behavior:'smooth'});
+      if (pageId === 'timePage') renderTimelineWidget();
+    }
+
     function render() {
-      renderSummaryWidget();
+      renderTopLocationFilters();
+      renderLocationOptions();
+      renderLocationManagement();
+      renderTimelineWidget();
       renderCards();
       lucide.createIcons();
     }
 
-    function renderSummaryWidget() {
-      let normal = 0, warning = 0, expired = 0;
+    function renderTimelineWidget() {
+      const container = document.getElementById('replacement-timeline');
+      if (!container) return;
+      if (!filters.length) {
+        container.innerHTML = `<div class="py-6 text-center dark:text-slate-400 light:text-slate-500"><i data-lucide="gantt-chart" class="w-7 h-7 mx-auto mb-2 opacity-60"></i><p class="text-xs font-semibold">新增濾網後，這裡會顯示更換甘特圖</p></div>`;
+        lucide.createIcons(); return;
+      }
 
-      filters.forEach(f => {
-        const st = getFilterStatus(f).status;
-        if (st === "normal") normal++;
-        else if (st === "warning") warning++;
-        else if (st === "expired") expired++;
+      const today = new Date(); today.setHours(0,0,0,0);
+      const dateOnly = v => new Date(String(v) + 'T00:00:00');
+      const DAY = 86400000;
+      const utc = d => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+      const days = (a,b) => Math.round((utc(b)-utc(a))/DAY);
+      const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+      const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+      // 保留完整更換歷史：每筆歷史紀錄代表「前一次更換日 → 本次更換日」的使用區間。
+      const rowsData = filters.map(item => {
+        const records = replacementHistory
+          .filter(h => h.id === item.id && h.date)
+          .map(h => ({ start: h.previousDate ? dateOnly(h.previousDate) : null, end: dateOnly(h.date), historical: true }))
+          .filter(r => r.start && r.end && r.end >= r.start);
+        const currentStart = dateOnly(item.lastDate);
+        const due = new Date(currentStart);
+        due.setDate(due.getDate() + Number(item.lifespan || 90));
+        return { item, intervals: [...records, { start: currentStart, end: due, historical: false }], currentStart, due };
       });
 
-      const total = filters.length;
-      document.getElementById('total-filter-count').innerText = total;
-      document.getElementById('count-normal').innerText = normal;
-      document.getElementById('count-warning').innerText = warning;
-      document.getElementById('count-expired').innerText = expired;
+      const allStarts = rowsData.flatMap(r => r.intervals.map(i => i.start)).filter(Boolean);
+      const allEnds = rowsData.flatMap(r => r.intervals.map(i => i.end)).filter(Boolean);
+      const earliest = allStarts.length ? new Date(Math.min(...allStarts.map(d => d.getTime()))) : today;
+      const latest = allEnds.length ? new Date(Math.max(...allEnds.map(d => d.getTime()))) : today;
+      const viewStart = new Date(earliest.getFullYear(), earliest.getMonth(), 1);
+      const viewEnd = new Date(Math.max(latest.getFullYear(), today.getFullYear()), Math.max(latest.getMonth()+1, today.getMonth()+2), 1);
+      const monthCount = Math.max(3, (viewEnd.getFullYear()-viewStart.getFullYear())*12 + viewEnd.getMonth()-viewStart.getMonth());
+      const monthWidth = 92, labelWidth = 132;
+      const chartWidth = monthCount * monthWidth;
+      const span = days(viewStart, viewEnd);
+      const months = Array.from({length:monthCount},(_,i)=>new Date(viewStart.getFullYear(),viewStart.getMonth()+i,1));
+      const monthHeaders = months.map(m => {
+        const current = m.getFullYear()===today.getFullYear() && m.getMonth()===today.getMonth();
+        return `<div style="width:${monthWidth}px" class="shrink-0 h-10 flex items-center justify-center border-b dark:border-slate-700/60 light:border-slate-200/90 ${current?'bg-sky-500/10':''}"><span class="text-[10px] font-extrabold ${current?'text-sky-500':'dark:text-slate-300 light:text-slate-600'}">${m.getFullYear()!==today.getFullYear()?m.getFullYear()+' ':''}${m.getMonth()+1}月</span></div>`;
+      }).join('');
+      const grid = months.map((_,i)=>`<div class="absolute top-0 bottom-0 border-l dark:border-slate-700/45 light:border-slate-200/80" style="left:${i*monthWidth}px"></div>`).join('');
 
-      const healthBadge = document.getElementById('health-score-badge');
-      const healthRatio = total > 0 ? Math.round((normal / total) * 100) : 100;
-      healthBadge.innerText = `健康度 ${healthRatio}%`;
-
-      // 通知已整合至下方「設定」，上方不再使用通知徽章。
-      // 保留防呆，避免移除 Header 通知按鈕後中斷後續卡片渲染。
-      const notifBadge = document.getElementById('notif-badge');
-      if (notifBadge) {
-        notifBadge.classList.toggle('hidden', !(warning > 0 || expired > 0));
-      }
-
-      const ctx = document.getElementById('statusChart').getContext('2d');
-      if (statusChartInstance) {
-        statusChartInstance.destroy();
-      }
-
-      statusChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['良好', '即將到期', '已過期'],
-          datasets: [{
-            data: [normal, warning, expired],
-            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'],
-            borderWidth: 0,
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          cutout: '75%',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: true }
+      const rows = rowsData.map(({item, intervals, currentStart, due}) => {
+        const bars = intervals.map(interval => {
+          const x = clamp(days(viewStart, interval.start)/span*chartWidth,0,chartWidth);
+          const x2 = clamp(days(viewStart, interval.end)/span*chartWidth,0,chartWidth);
+          const width = Math.max(7, x2-x);
+          if (interval.historical) {
+            return `<div class="absolute top-1/2 -translate-y-1/2 h-6 rounded-md border bg-slate-400/30 border-slate-400/50 dark:bg-slate-500/35 dark:border-slate-400/45" style="left:${x}px;width:${width}px" title="歷史使用：${fmt(interval.start)} → ${fmt(interval.end)}"><span class="h-full flex items-center px-1.5 text-[8px] font-bold dark:text-slate-200 light:text-slate-600 whitespace-nowrap overflow-hidden">${fmt(interval.start)} → ${fmt(interval.end)}</span></div>`;
           }
-        }
+          const remain = days(today, interval.end);
+          const cls = remain<0?'bg-rose-500/75 border-rose-400/80':remain<=15?'bg-amber-500/75 border-amber-400/80':'bg-sky-500/65 border-sky-400/80';
+          const status = remain<0?`逾期 ${Math.abs(remain)}天`:remain===0?'今天到期':`剩 ${remain}天`;
+          return `<div class="absolute top-1/2 -translate-y-1/2 h-7 rounded-lg border ${cls}" style="left:${x}px;width:${width}px" title="目前使用：${fmt(interval.start)} → ${fmt(interval.end)}"><span class="h-full flex items-center px-2 text-[9px] font-black text-white whitespace-nowrap overflow-hidden">${status}</span></div>`;
+        }).join('');
+        return `<div class="grid min-h-[54px] border-b dark:border-slate-800/60 light:border-slate-200/80" style="grid-template-columns:${labelWidth}px ${chartWidth}px"><div class="sticky left-0 z-20 px-2 flex flex-col justify-center min-w-0 border-r dark:border-slate-700/60 light:border-slate-200/90 dark:bg-slate-950/95 light:bg-white/95 backdrop-blur-sm"><div class="text-[10px] font-extrabold truncate dark:text-white light:text-slate-800">${escapeHtml(item.name||item.type)}</div><div class="text-[9px] truncate dark:text-slate-500 light:text-slate-500">${escapeHtml(item.location)} · ${escapeHtml(item.type)}</div></div><div class="relative" style="width:${chartWidth}px">${grid}${bars}</div></div>`;
+      }).join('');
+
+      const todayX = clamp(days(viewStart,today)/span*chartWidth,0,chartWidth);
+      container.innerHTML=`<div id="timeline-scroll" class="overflow-x-auto pb-2 -mx-1 px-1"><div class="relative" style="min-width:${labelWidth+chartWidth}px"><div class="grid" style="grid-template-columns:${labelWidth}px ${chartWidth}px"><div class="sticky left-0 z-30 h-10 flex items-center px-2 border-b border-r dark:border-slate-700/60 light:border-slate-200/90 dark:bg-slate-950/95 light:bg-white/95 backdrop-blur-sm"><span class="text-[9px] font-black tracking-wider dark:text-slate-500 light:text-slate-400">濾網項目</span></div><div class="flex">${monthHeaders}</div></div><div class="relative">${rows}<div class="absolute top-0 bottom-0 z-20 pointer-events-none" style="left:${labelWidth+todayX}px"><div class="absolute top-0 bottom-0 w-px bg-rose-500/70"></div><div class="absolute top-0 left-1/2 -translate-x-1/2 whitespace-nowrap text-[8px] font-black text-rose-500 bg-rose-500/10 border border-rose-500/20 rounded-full px-1.5 py-0.5">今天</div></div></div></div></div><div class="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 px-1 text-[9px] dark:text-slate-500 light:text-slate-500"><span class="inline-flex items-center gap-1.5"><i class="w-2.5 h-2.5 rounded bg-sky-500/70"></i>目前使用中</span><span class="inline-flex items-center gap-1.5"><i class="w-2.5 h-2.5 rounded bg-amber-500/70"></i>15 天內到期</span><span class="inline-flex items-center gap-1.5"><i class="w-2.5 h-2.5 rounded bg-rose-500/70"></i>已到期</span><span class="inline-flex items-center gap-1.5"><i class="w-2.5 h-2.5 rounded bg-slate-400/50"></i>過去更換紀錄</span><span class="inline-flex items-center gap-1.5"><i class="w-px h-3 bg-rose-500"></i>今天</span></div>`;
+      lucide.createIcons();
+      // 時間圖開啟後預設把水平視窗定位到「今天」，方便直接查看目前進度。
+      requestAnimationFrame(() => {
+        const scroller = document.getElementById('timeline-scroll');
+        if (!scroller) return;
+        const todayCenterX = labelWidth + todayX;
+        const target = Math.max(0, todayCenterX - scroller.clientWidth / 2);
+        scroller.scrollLeft = Math.min(target, Math.max(0, scroller.scrollWidth - scroller.clientWidth));
       });
     }
 
@@ -843,6 +1080,9 @@
             <button onclick="quickReplace('${item.id}')" title="今天已更換" class="p-2 rounded-xl glass-button text-emerald-500 hover:bg-emerald-500/20">
               <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
             </button>
+            <button onclick="openReplacementHistory('${item.id}')" title="查看更換紀錄" class="p-2 rounded-xl glass-button text-sky-500 hover:bg-sky-500/20">
+              <i data-lucide="history" class="w-4 h-4"></i>
+            </button>
             <button onclick="openEditModal('${item.id}')" class="p-2 rounded-xl glass-button dark:text-slate-300 light:text-slate-700">
               <i data-lucide="edit-3" class="w-4 h-4"></i>
             </button>
@@ -886,6 +1126,7 @@
         }
       });
       renderCards();
+      renderTopLocationFilters();
       lucide.createIcons();
     }
 
@@ -904,15 +1145,55 @@
 
     function quickReplace(id) {
       const idx = filters.findIndex(f => f.id === id);
-      if (idx !== -1) {
-        filters[idx].lastDate = new Date().toISOString().split('T')[0];
-        saveData();
-        showToast("更換日期已更新為今天！");
+      if (idx === -1) return;
+      const item = filters[idx];
+      const today = new Date().toISOString().split('T')[0];
+      const previousDate = item.lastDate;
+      const usedDays = previousDate ? Math.max(0, Math.round((new Date(today+'T00:00:00') - new Date(previousDate+'T00:00:00')) / 86400000)) : null;
+      if (previousDate === today) {
+        showToast('今天已登記過更換，不會重複建立紀錄');
+        return;
       }
+      replacementHistory.unshift({
+        id: item.id,
+        date: today,
+        previousDate,
+        usedDays,
+        location: item.location,
+        type: item.type,
+        name: item.name || ''
+      });
+      item.lastDate = today;
+      saveData();
+      showToast("已更新更換日期，舊資料已保留在更換紀錄");
     }
 
-    /* Reliable iOS Modal Deletion */
+    function openReplacementHistory(id) {
+      const item = filters.find(f => f.id === id);
+      if (!item) return;
+      const list = document.getElementById('replacement-history-list');
+      const title = document.getElementById('replacement-history-title');
+      title.textContent = item.name || item.type;
+      const records = replacementHistory.filter(h => h.id === item.id).sort((a,b) => String(b.date).localeCompare(String(a.date)));
+      if (!records.length) {
+        list.innerHTML = `<div class="py-5 text-center dark:text-slate-400 light:text-slate-500"><i data-lucide="history" class="w-7 h-7 mx-auto mb-2 opacity-60"></i><p class="text-xs font-semibold">目前還沒有更換歷史</p><p class="text-[10px] mt-1">按下濾網卡片上的更換按鈕後，舊資料會自動保留。</p></div>`;
+      } else {
+        list.innerHTML = records.map((h, i) => {
+          const used = h.usedDays == null ? '—' : `${h.usedDays} 天`;
+          return `<div class="relative pl-5 pb-3 ${i < records.length-1 ? 'border-l border-slate-300/60 dark:border-slate-700/60 ml-1.5' : 'ml-1.5'}"><span class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-sky-500 ring-4 dark:ring-slate-900/80 light:ring-white/80"></span><div class="rounded-xl p-3 glass-button"><div class="flex items-center justify-between gap-2"><strong class="text-xs dark:text-white light:text-slate-800">${escapeHtml(h.date)}</strong><span class="text-[10px] font-bold text-sky-500">使用 ${used}</span></div><p class="text-[10px] mt-1 dark:text-slate-400 light:text-slate-500">${h.previousDate ? `前一次更換：${escapeHtml(h.previousDate)}` : '首次紀錄'}</p></div></div>`;
+        }).join('');
+      }
+      document.getElementById('replacementHistoryModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeReplacementHistory() {
+      document.getElementById('replacementHistoryModal').classList.add('hidden');
+    }
+
+    /* 雙重確認刪除：第一次確認後，要求輸入每次隨機產生的 4 位數驗證碼。 */
     function askDeleteFilter(id) {
+      if (!filters.some(f => f.id === id)) return;
       pendingDeleteId = id;
       document.getElementById('deleteConfirmModal').classList.remove('hidden');
     }
@@ -923,12 +1204,91 @@
     }
 
     function executeDelete() {
-      if (pendingDeleteId) {
-        filters = filters.filter(f => f.id !== pendingDeleteId);
-        saveData();
-        closeDeleteModal();
-        showToast("已成功刪除該濾網紀錄");
+      if (!pendingDeleteId) return;
+      const item = filters.find(f => f.id === pendingDeleteId);
+      if (!item) { closeDeleteModal(); return; }
+      pendingDeleteCode = String(Math.floor(1000 + Math.random() * 9000));
+      document.getElementById('deleteConfirmModal').classList.add('hidden');
+      const display = document.getElementById('delete-code-display');
+      const input = document.getElementById('delete-code-input');
+      const error = document.getElementById('delete-code-error');
+      display.textContent = pendingDeleteCode;
+      input.value = '';
+      error.textContent = '';
+      document.getElementById('deletePasswordModal').classList.remove('hidden');
+      lucide.createIcons();
+      setTimeout(() => input.focus(), 120);
+    }
+
+    function closeDeletePasswordModal() {
+      pendingDeleteId = null;
+      pendingDeleteCode = null;
+      document.getElementById('deletePasswordModal').classList.add('hidden');
+      document.getElementById('delete-code-input').value = '';
+      document.getElementById('delete-code-error').textContent = '';
+    }
+
+    function verifyDeleteCode() {
+      const input = document.getElementById('delete-code-input');
+      const code = String(input.value || '').replace(/\D/g, '').slice(0,4);
+      input.value = code;
+      if (code.length !== 4 || code !== pendingDeleteCode) {
+        document.getElementById('delete-code-error').textContent = '驗證碼錯誤，請重新輸入。';
+        input.focus();
+        return;
       }
+      const deleteId = pendingDeleteId;
+      const item = filters.find(f => f.id === deleteId);
+      if (!item) {
+        closeDeletePasswordModal();
+        return;
+      }
+
+      // 初次「刪除」確認 + 隨機 4 位數驗證 = 雙重確認。
+      // 驗證碼正確後直接執行刪除，避免 iPhone Web App 的原生 confirm 被阻擋。
+      filters = filters.filter(f => f.id !== deleteId);
+      replacementHistory = replacementHistory.filter(h => h.id !== deleteId);
+      localStorage.setItem('filter_track_data', JSON.stringify(filters));
+      localStorage.setItem('filter_track_history', JSON.stringify(replacementHistory));
+      closeDeletePasswordModal();
+      render();
+      showToast(`「${item.name || item.type}」已刪除`);
+    }
+
+    function askResetAllFilters() {
+      pendingResetCode = String(Math.floor(1000 + Math.random() * 9000));
+      const modal = document.getElementById('resetAllPasswordModal');
+      document.getElementById('reset-code-display').textContent = pendingResetCode;
+      document.getElementById('reset-code-input').value = '';
+      document.getElementById('reset-code-error').textContent = '';
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+      setTimeout(() => document.getElementById('reset-code-input')?.focus(), 120);
+    }
+
+    function closeResetAllModal() {
+      pendingResetCode = null;
+      document.getElementById('resetAllPasswordModal').classList.add('hidden');
+      document.getElementById('reset-code-input').value = '';
+      document.getElementById('reset-code-error').textContent = '';
+    }
+
+    function verifyResetAllCode() {
+      const input = document.getElementById('reset-code-input');
+      const code = String(input.value || '').replace(/\D/g, '').slice(0,4);
+      input.value = code;
+      if (code.length !== 4 || code !== pendingResetCode) {
+        document.getElementById('reset-code-error').textContent = '驗證碼錯誤，請重新輸入。';
+        input.focus();
+        return;
+      }
+      // 完全重置：清除所有濾網卡片與所有更換歷史，回到初始狀態。
+      filters = [];
+      replacementHistory = [];
+      saveData();
+      closeResetAllModal();
+      render();
+      showToast('已完全重置：所有濾網卡片與紀錄已清除 ✓');
     }
 
     function openAddModal() {
@@ -966,9 +1326,9 @@
       document.getElementById('formLocation').value = loc;
       document.querySelectorAll('.form-loc-btn').forEach(btn => {
         if (btn.dataset.loc === loc) {
-          btn.className = "form-loc-btn py-2 text-xs rounded-xl glass-button text-center font-bold bg-sky-500/30 text-sky-500 border-sky-400/50";
+          btn.classList.add('is-selected');
         } else {
-          btn.className = "form-loc-btn py-2 text-xs rounded-xl glass-button text-center font-medium";
+          btn.classList.remove('is-selected');
         }
       });
     }
@@ -977,9 +1337,9 @@
       document.getElementById('formType').value = type;
       document.querySelectorAll('.form-type-btn').forEach(btn => {
         if (btn.dataset.type === type) {
-          btn.className = "form-type-btn py-2.5 px-3 text-xs rounded-xl glass-button flex items-center space-x-2 font-bold bg-sky-500/30 text-sky-500 border-sky-400/50";
+          btn.classList.add('is-selected');
         } else {
-          btn.className = "form-type-btn py-2.5 px-3 text-xs rounded-xl glass-button flex items-center space-x-2 font-medium";
+          btn.classList.remove('is-selected');
         }
       });
     }
@@ -989,39 +1349,63 @@
     }
 
     function handleSaveFilter(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
 
-      const id = document.getElementById('formId').value;
-      const location = document.getElementById('formLocation').value;
-      const type = document.getElementById('formType').value;
-      const name = document.getElementById('formName').value.trim();
-      const lastDate = document.getElementById('formDate').value;
-      const lifespan = parseInt(document.getElementById('formLifespan').value) || 90;
+      try {
+        const id = String(document.getElementById('formId').value || '');
+        const location = String(document.getElementById('formLocation').value || '');
+        const type = String(document.getElementById('formType').value || '');
+        const name = String(document.getElementById('formName').value || '').trim();
+        const lastDate = String(document.getElementById('formDate').value || '');
+        const lifespanInput = document.getElementById('formLifespan').value;
+        const lifespan = Number.parseInt(lifespanInput, 10);
 
-      if (!location || !type || !lastDate) {
-        showToast("請完整的選擇區域與類型！");
-        return;
-      }
-
-      if (id) {
-        const idx = filters.findIndex(f => f.id === id);
-        if (idx !== -1) {
-          filters[idx] = { id, location, type, name, lastDate, lifespan };
+        if (!location) {
+          showToast('請先選擇安裝區域');
+          return false;
         }
-      } else {
-        filters.unshift({
-          id: 'f_' + Date.now(),
+        if (!type) {
+          showToast('請先選擇濾網類型');
+          return false;
+        }
+        if (!lastDate) {
+          showToast('請選擇上次更換日期');
+          return false;
+        }
+        if (!Number.isFinite(lifespan) || lifespan < 1) {
+          showToast('請輸入有效的耐用天數');
+          return false;
+        }
+
+        const record = {
+          id: id || ('f_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)),
           location,
           type,
           name,
           lastDate,
           lifespan
-        });
-      }
+        };
 
-      saveData();
-      closeAddModal();
-      showToast(id ? "修改已更新" : "成功新增濾網項目");
+        if (id) {
+          const idx = filters.findIndex(f => String(f.id) === id);
+          if (idx === -1) {
+            showToast('找不到要修改的濾網紀錄');
+            return false;
+          }
+          filters[idx] = record;
+        } else {
+          filters.unshift(record);
+        }
+
+        saveData();
+        closeAddModal();
+        showToast(id ? '修改已更新' : '成功新增濾網項目');
+        return false;
+      } catch (err) {
+        console.error('FilterTrack 儲存失敗:', err);
+        showToast('儲存失敗，請再試一次');
+        return false;
+      }
     }
 
     function showToast(msg) {
@@ -1033,11 +1417,38 @@
       setTimeout(() => { toast.remove(); }, 2500);
     }
 
+    function openExpiryNotifications() {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const dueItems = filters.map(item => {
+        const due = new Date(item.lastDate + 'T00:00:00');
+        due.setDate(due.getDate() + Number(item.lifespan || 90));
+        due.setHours(0,0,0,0);
+        const days = Math.round((due - today) / 86400000);
+        return { item, due, days };
+      }).filter(x => x.days <= 30).sort((a,b) => a.days - b.days);
+      const list = document.getElementById('expiry-notification-list');
+      document.getElementById('expiry-notification-count').textContent = `${dueItems.length} 項`;
+      list.innerHTML = dueItems.length ? dueItems.map(({item,due,days}) => {
+        const expired = days < 0, todayDue = days === 0;
+        const label = expired ? `已逾期 ${Math.abs(days)} 天` : todayDue ? '今天到期' : `剩餘 ${days} 天`;
+        const color = expired || todayDue ? 'text-rose-500' : 'text-amber-500';
+        return `<div class="p-3 rounded-xl border border-slate-400/20 bg-slate-500/5"><div class="flex justify-between gap-2"><strong class="dark:text-white light:text-slate-800">${item.name || item.type}</strong><b class="${color} shrink-0">${label}</b></div><p class="mt-1 dark:text-slate-400 light:text-slate-500">${item.location} · ${item.type}</p><p class="mt-1 dark:text-slate-400 light:text-slate-500">預計更換：${due.getFullYear()}/${due.getMonth()+1}/${due.getDate()}</p></div>`;
+      }).join('') : '<p class="py-3 text-center dark:text-slate-400 light:text-slate-500">目前沒有 30 天內到期或已逾期的濾芯 🎉</p>';
+      document.getElementById('notificationModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
     function toggleNotificationModal() {
-      const modal = document.getElementById('notificationModal');
+      document.getElementById('notificationModal').classList.toggle('hidden');
+    }
+
+    function toggleSettingsModal() {
+      const modal = document.getElementById('settingsModal');
       modal.classList.toggle('hidden');
-      updateNotificationStatus();
       updateBackupStatus();
+      renderLocationManagement();
+      renderLocationOptions();
+      lucide.createIcons();
     }
 
     function updateNotificationStatus() {
@@ -1094,5 +1505,25 @@
       render();
     };
   </script>
+  <div id="resetAllPasswordModal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-md hidden transition-opacity duration-300">
+    <div class="w-[88%] max-w-sm rounded-3xl p-5 glass-panel shadow-2xl">
+      <div class="flex items-center gap-2 mb-3">
+        <i data-lucide="shield-alert" class="w-5 h-5 text-rose-500"></i>
+        <h3 class="text-base font-bold dark:text-white light:text-slate-800">完全重置</h3>
+      </div>
+      <p class="text-xs dark:text-slate-300 light:text-slate-600 leading-relaxed mb-3">這會清除所有濾網卡片與所有更換紀錄，回到尚未建立濾網的初始狀態。此操作無法復原，請確認後再繼續。</p>
+      <div class="rounded-2xl p-4 text-center bg-rose-500/10 border border-rose-500/20 mb-3">
+        <p class="text-[10px] font-bold text-slate-400 mb-1">請輸入隨機 4 位數驗證碼</p>
+        <div id="reset-code-display" class="text-2xl tracking-[0.45em] font-black text-rose-500 pl-[0.45em]">----</div>
+      </div>
+      <input id="reset-code-input" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="輸入 4 位數" class="w-full text-center text-lg tracking-[0.35em] rounded-2xl px-4 py-3 glass-button outline-none border border-black/10 dark:border-white/10 focus:border-rose-500/60">
+      <p id="reset-code-error" class="text-[11px] font-bold text-rose-500 min-h-[16px] mt-1"></p>
+      <div class="grid grid-cols-2 gap-2 mt-2">
+        <button type="button" onclick="closeResetAllModal()" class="py-2.5 rounded-xl glass-button font-bold text-xs">取消</button>
+        <button type="button" onclick="verifyResetAllCode()" class="py-2.5 rounded-xl bg-rose-500 text-white font-bold text-xs">確認完全重置</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
