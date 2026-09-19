@@ -65,174 +65,124 @@
       background: var(--bg-gradient-light);
     }
 
-    /* iOS Notch & Safe Area paddings */
-    .ios-safe-top {
-      padding-top: max(1.25rem, env(safe-area-inset-top));
-    }
-    .ios-safe-bottom {
-      padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
-    }
-    .ios-safe-left {
-      padding-left: max(1rem, env(safe-area-inset-left));
-    }
-    .ios-safe-right {
-      padding-right: max(1rem, env(safe-area-inset-right));
-    }
+    /* ===== FilterTrack UI / iOS Web App layout ===== */
+    .ios-safe-bottom { padding-bottom: max(.75rem, env(safe-area-inset-bottom)); }
+    .ios-safe-left { padding-left: max(1rem, env(safe-area-inset-left)); }
+    .ios-safe-right { padding-right: max(1rem, env(safe-area-inset-right)); }
 
-    /* Dynamic Glassmorphism Panels for Dark / Light Modes */
+    /* Frosted glass */
     .dark .glass-panel {
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      background: rgba(15,23,42,.68);
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 10px 35px rgba(0,0,0,.28);
     }
-
     .light .glass-panel {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      box-shadow: 0 8px 30px rgba(148, 163, 184, 0.25);
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      border: 1px solid rgba(255,255,255,.82);
+      box-shadow: 0 10px 35px rgba(100,116,139,.18);
     }
-
     .dark .glass-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      background: linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.035));
+      backdrop-filter: blur(18px) saturate(140%);
+      -webkit-backdrop-filter: blur(18px) saturate(140%);
+      border: 1px solid rgba(255,255,255,.13);
+      box-shadow: 0 6px 25px rgba(0,0,0,.22);
     }
-
     .light .glass-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.9);
-      box-shadow: 0 4px 20px rgba(148, 163, 184, 0.18);
+      background: linear-gradient(135deg,rgba(255,255,255,.88),rgba(255,255,255,.58));
+      backdrop-filter: blur(18px) saturate(140%);
+      -webkit-backdrop-filter: blur(18px) saturate(140%);
+      border: 1px solid rgba(255,255,255,.9);
+      box-shadow: 0 6px 25px rgba(100,116,139,.15);
     }
-
-    .dark .glass-input {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #ffffff;
-    }
-
-    .light .glass-input {
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(203, 213, 225, 0.8);
-      color: #0f172a;
-    }
-
+    .dark .glass-input { background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.18); color:#fff; }
+    .light .glass-input { background:rgba(255,255,255,.78); border:1px solid rgba(203,213,225,.8); color:#0f172a; }
     .dark .glass-button {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #e2e8f0;
+      background:rgba(255,255,255,.08);
+      backdrop-filter:blur(14px) saturate(140%);
+      -webkit-backdrop-filter:blur(14px) saturate(140%);
+      border:1px solid rgba(255,255,255,.16); color:#e2e8f0;
     }
-
     .light .glass-button {
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(226, 232, 240, 0.9);
-      color: #334155;
+      background:rgba(255,255,255,.72);
+      backdrop-filter:blur(14px) saturate(140%);
+      -webkit-backdrop-filter:blur(14px) saturate(140%);
+      border:1px solid rgba(226,232,240,.88); color:#334155;
     }
+    .glass-button:active { transform:scale(.95); }
+    .no-scrollbar::-webkit-scrollbar { display:none; }
+    .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
+    .glow-amber { box-shadow:0 0 15px rgba(245,158,11,.35); }
+    .glow-rose { box-shadow:0 0 15px rgba(244,63,94,.35); }
 
-    .glass-button:active {
-      transform: scale(0.95);
-    }
-
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    .glow-amber {
-      box-shadow: 0 0 15px rgba(245, 158, 11, 0.35);
-    }
-    .glow-rose {
-      box-shadow: 0 0 15px rgba(244, 63, 94, 0.35);
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .animate-slide-up {
-      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
+    @keyframes slideUp { from { transform:translateY(100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
+    .animate-slide-up { animation:slideUp .3s cubic-bezier(.16,1,.3,1) forwards; }
 
     /* Light mode readability */
-    .light body, body.light { color: #0f172a; }
-    .light .text-slate-100, .light .text-slate-200, .light .text-slate-300 { color: #334155 !important; }
-    .light .text-slate-400 { color: #64748b !important; }
-    .light .text-slate-500 { color: #64748b !important; }
-    .light .text-white { color: #0f172a !important; }
-    .light .dark\:text-white { color: #0f172a !important; }
-    .light .dark\:text-slate-300 { color: #475569 !important; }
-    .light .dark\:text-slate-400 { color: #64748b !important; }
-    .light .dark\:text-slate-500 { color: #64748b !important; }
-    .light .glass-panel { color: #0f172a; }
-    .light .glass-button { color: #334155; }
-    .light .type-filter-btn, .light .loc-filter-btn, .light .form-type-btn, .light .form-loc-btn { color: #334155; }
-    .light .type-filter-btn.text-sky-500, .light .form-type-btn.text-sky-500, .light .form-loc-btn.text-sky-500 { color: #0284c7 !important; }
-    .light input, .light select, .light textarea { color: #0f172a !important; }
-    .light input::placeholder, .light textarea::placeholder { color: #94a3b8 !important; opacity: 1; }
-  
-    /* iPhone 瀏海 / Dynamic Island / Home Indicator 安全區 */
-    .ios-app-header { position: relative; top: auto; padding-top: max(2.75rem, calc(env(safe-area-inset-top) + 1.5rem)); }
-    .ios-safe-bottom { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
-    .ios-safe-left { padding-left: max(1.25rem, env(safe-area-inset-left)); }
-    .ios-safe-right { padding-right: max(1.25rem, env(safe-area-inset-right)); }
+    .light body, body.light { color:#0f172a; }
+    .light .text-slate-100,.light .text-slate-200,.light .text-slate-300 { color:#334155 !important; }
+    .light .text-slate-400,.light .text-slate-500 { color:#64748b !important; }
+    .light .text-white,.light .dark\:text-white { color:#0f172a !important; }
+    .light .dark\:text-slate-300 { color:#475569 !important; }
+    .light .dark\:text-slate-400,.light .dark\:text-slate-500 { color:#64748b !important; }
+    .light .glass-panel { color:#0f172a; }
+    .light .glass-button { color:#334155; }
+    .light .type-filter-btn,.light .loc-filter-btn,.light .form-type-btn,.light .form-loc-btn { color:#334155; }
+    .light .type-filter-btn.text-sky-500,.light .form-type-btn.text-sky-500,.light .form-loc-btn.text-sky-500 { color:#0284c7 !important; }
+    .light input,.light select,.light textarea { color:#0f172a !important; }
+    .light input::placeholder,.light textarea::placeholder { color:#94a3b8 !important; opacity:1; }
 
-    /* Standalone Web App: keep fixed/sticky UI out of the notch and home indicator */
-    @supports (padding: env(safe-area-inset-top)) {
-      .ios-app-header {
-        top: env(safe-area-inset-top);
-      }
-      footer {
-        padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
-      }
-      main {
-        scroll-padding-top: calc(1rem + env(safe-area-inset-top));
-      }
+    /* Header stays in normal document flow. The Web App safe area is an actual
+       child block, so it scrolls away together with the title instead of becoming
+       a fixed/sticky notch dead-zone. */
+    .app-header {
+      position:relative;
+      z-index:10;
+      width:100%;
+      flex:none;
+      overflow:hidden;
+      border-radius:0 0 22px 22px;
+    }
+    .app-header-content {
+      min-height:64px;
+      padding:12px 20px;
+      padding-top:max(12px, env(safe-area-inset-top));
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:12px;
     }
 
-    /* Standalone Web App: reserve enough space for the floating bottom navigation */
-    .app-main {
-      padding-bottom: max(10rem, calc(10rem + env(safe-area-inset-bottom)));
+    .app-main { padding-bottom:11rem; }
+    .app-bottom-nav { padding-bottom:max(.5rem, env(safe-area-inset-bottom)); }
+    .app-bottom-nav > div {
+      backdrop-filter:blur(24px) saturate(160%);
+      -webkit-backdrop-filter:blur(24px) saturate(160%);
     }
-    .app-bottom-nav {
-      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+
+    @supports not ((backdrop-filter: blur(1px))) {
+      .glass-panel,.glass-card,.glass-button { background:rgba(15,23,42,.92); }
+      .light .glass-panel,.light .glass-card,.light .glass-button { background:rgba(255,255,255,.94); }
     }
 </style>
 </head>
 <body class="text-slate-100 dark:text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-sky-500 selection:text-white ios-safe-left ios-safe-right">
 
-  <header class="glass-panel border-b border-white/10 dark:border-white/10 light:border-slate-200 px-5 py-3 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <div class="p-2.5 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30">
-        <i data-lucide="shield-check" class="w-6 h-6"></i>
+  <header class="app-header glass-panel">
+    <div class="app-header-content">
+      <div class="flex items-center space-x-3 min-w-0">
+        <div class="p-2.5 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 shrink-0">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-lg font-extrabold tracking-tight dark:text-white light:text-slate-800 truncate">淨家 FilterTrack</h1>
+          <p class="text-[10px] dark:text-slate-400 light:text-slate-500 font-semibold">智能濾網管家</p>
+        </div>
       </div>
-      <div>
-        <h1 class="text-lg font-extrabold tracking-tight dark:text-white light:text-slate-800">
-          淨家 FilterTrack
-        </h1>
-        <p class="text-[10px] dark:text-slate-400 light:text-slate-500 font-semibold">智能濾網管家</p>
-      </div>
-    </div>
-    
-    <div class="flex items-center space-x-2">
-      <!-- Notification Icon Button -->
-      <button onclick="toggleNotificationModal()" class="relative glass-button p-2.5 rounded-full hover:scale-105 transition">
-        <i data-lucide="bell" class="w-5 h-5 dark:text-slate-200 light:text-slate-700"></i>
-        <span id="notif-badge" class="hidden absolute top-0 right-0 w-3 h-3 bg-rose-500 rounded-full border-2 border-slate-900 animate-pulse"></span>
-      </button>
-      
     </div>
   </header>
 
@@ -755,11 +705,11 @@
       const healthRatio = total > 0 ? Math.round((normal / total) * 100) : 100;
       healthBadge.innerText = `健康度 ${healthRatio}%`;
 
+      // 通知已整合至下方「設定」，上方不再使用通知徽章。
+      // 保留防呆，避免移除 Header 通知按鈕後中斷後續卡片渲染。
       const notifBadge = document.getElementById('notif-badge');
-      if (warning > 0 || expired > 0) {
-        notifBadge.classList.remove('hidden');
-      } else {
-        notifBadge.classList.add('hidden');
+      if (notifBadge) {
+        notifBadge.classList.toggle('hidden', !(warning > 0 || expired > 0));
       }
 
       const ctx = document.getElementById('statusChart').getContext('2d');
